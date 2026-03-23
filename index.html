@@ -3,175 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financeiro Master PRO v4</title>
+    <title>Financeiro Master PRO v5</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #2563eb; --s: #22c55e; --w: #f59e0b; --d: #ef4444; --v: #a855f7; --dark: #1e293b; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; margin: 0; padding: 10px; }
-        .app { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        :root { 
+            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --sub: #64748b;
+            --p: #2563eb; --s: #10b981; --d: #ef4444; --w: #f59e0b; --v: #8b5cf6;
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --sub: #94a3b8;
+            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; padding: 15px; }
+        .app { max-width: 420px; margin: auto; background: var(--card); padding: 25px; border-radius: 30px; box-shadow: var(--shadow); position: relative; }
         
-        /* Gráfico */
-        .chart-container { position: relative; width: 220px; margin: auto; }
-        .center-val { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
-        .total-money { font-size: 22px; font-weight: 800; color: var(--dark); }
+        .header-ui { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .theme-btn { background: var(--bg); border: none; padding: 8px; border-radius: 12px; cursor: pointer; color: var(--text); font-size: 18px; }
 
         /* Status */
-        .badge { font-size: 11px; padding: 5px 12px; border-radius: 20px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
-        .normal { background: #e2e8f0; color: #64748b; }
-        .pro { background: linear-gradient(45deg, #f59e0b, #d4af37); color: white; }
+        .badge { font-size: 10px; padding: 6px 14px; border-radius: 50px; font-weight: 800; letter-spacing: 1px; }
+        .badge-normal { background: #e2e8f0; color: #475569; }
+        .badge-pro { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
 
-        /* Botões */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        button { padding: 14px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; }
-        .btn-e { background: var(--p); } .btn-g { background: var(--s); }
-        .btn-v { background: var(--w); } .btn-p { background: var(--d); }
-        .btn-i { background: var(--v); } .btn-atv { background: var(--dark); grid-column: span 2; }
+        /* Dashboard */
+        .chart-box { position: relative; width: 220px; margin: 20px auto; }
+        .center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); text-align: center; width: 100%; }
+        .balance { font-size: 26px; font-weight: 800; display: block; }
 
-        /* Histórico PRO */
-        #pro-section { margin-top: 20px; border-top: 2px solid #f1f5f9; padding-top: 15px; display: none; text-align: left; }
-        .item-hist { font-size: 12px; padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .item-hist span { display: block; }
-        .desc-text { color: #64748b; font-style: italic; font-size: 11px; }
+        /* Grid de Botões */
+        .section-label { font-size: 12px; font-weight: 800; color: var(--sub); text-align: left; margin: 15px 0 8px 5px; text-transform: uppercase; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        button { padding: 14px; border: none; border-radius: 16px; font-weight: 700; color: white; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        button:active { transform: scale(0.95); }
+        
+        .b-gan { background: var(--s); } .b-per { background: var(--d); }
+        .b-emp { background: var(--p); } .b-inv { background: var(--v); }
+        .b-dev { background: var(--w); } .b-gas { background: #475569; }
 
-        .resumo { background: #f8fafc; padding: 15px; border-radius: 15px; margin: 15px 0; font-size: 14px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index: 99; }
+        /* Listas PRO */
+        #pro-ui { margin-top: 25px; display: none; }
+        .list-container { background: var(--bg); border-radius: 20px; padding: 10px; max-height: 200px; overflow-y: auto; }
+        .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .hist-info span { display: block; }
+        .hist-title { font-size: 13px; font-weight: 700; }
+        .hist-desc { font-size: 11px; color: var(--sub); }
+
+        /* Modais */
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter: blur(5px); align-items:center; justify-content:center; z-index: 100; }
+        .m-content { background: var(--card); width: 85%; max-width: 350px; padding: 25px; border-radius: 25px; text-align: center; }
+        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; background: var(--bg); color: var(--text); }
     </style>
 </head>
-<body>
+<body data-theme="light">
 
 <div id="login-screen" class="app" style="margin-top: 50px; text-align: center;">
-    <h2>Entrar</h2>
-    <input type="number" id="login-phone" placeholder="Seu Número">
-    <button class="btn-e" style="width: 100%;" onclick="logar()">Acessar Conta</button>
+    <h2 style="font-weight: 800;">Financeiro Master</h2>
+    <p style="color: var(--sub); font-size: 14px;">Introduza seu número para começar</p>
+    <input type="number" id="login-phone" placeholder="Ex: 84XXXXXXX">
+    <button class="b-gan" style="width: 100%; margin-top: 10px;" onclick="logar()">Acessar Painel</button>
 </div>
 
-<div id="main-app" class="app" style="display:none; text-align: center;">
-    <div id="status-tag" class="badge normal">NÍVEL: NORMAL</div>
-    
-    <div class="chart-container">
+<div id="main-app" class="app" style="display:none;">
+    <div class="header-ui">
+        <div id="status-tag" class="badge badge-normal">NÍVEL SIMPLES</div>
+        <button class="theme-btn" onclick="toggleTheme()">🌓</button>
+    </div>
+
+    <div class="chart-box">
         <canvas id="myChart"></canvas>
-        <div class="center-val">
-            <div class="total-money" id="topo-val">0 MT</div>
-            <div style="font-size: 9px; color: #94a3b8;">DISPONÍVEL</div>
+        <div class="center-text">
+            <span style="font-size: 10px; color: var(--sub); font-weight: bold;">SALDO TOTAL</span>
+            <span class="balance" id="topo-val">0 MT</span>
         </div>
     </div>
 
-    <div class="resumo">
-        <p style="display:flex; justify-content:space-between">Líquido: <strong id="liq-val">0</strong></p>
-        <p style="display:flex; justify-content:space-between">S/ Empréstimo: <strong id="qui-val">0</strong></p>
+    <div class="section-label">Ações Simples</div>
+    <div class="btn-grid">
+        <button class="b-gan" onclick="adicionar('gan', 'Ganho')">➕ Ganhos</button>
+        <button class="b-per" onclick="adicionar('per', 'Perda')">➖ Perdas</button>
     </div>
 
-    <div class="grid">
-        <button class="btn-e" onclick="adicionar('emp', 'Empréstimo')">Empréstimo</button>
-        <button class="btn-g" onclick="adicionar('gan', 'Ganho')">Ganhos</button>
-        <button class="btn-v" onclick="adicionar('ven', 'Venda')">Vendas</button>
-        <button class="btn-p" onclick="adicionar('per', 'Perda')">Perdas</button>
-        <button class="btn-i" onclick="adicionar('inv', 'Investimento')">Investimento</button>
-        <button class="btn-atv" id="btn-atv" onclick="abrirModal()">ATIVAR NÍVEL PRO (50 MTn)</button>
+    <div id="pro-buttons" style="display: none;">
+        <div class="section-label">Ações Profissionais</div>
+        <div class="btn-grid">
+            <button class="b-emp" onclick="adicionar('emp', 'Empréstimo')">🏦 Empréstimo</button>
+            <button class="b-dev" onclick="abrirDevolucao()">💸 Devolução</button>
+            <button class="b-inv" onclick="adicionar('inv', 'Investimento')">📈 Invest.</button>
+            <button class="b-gas" onclick="adicionar('gas', 'Gasto')">🛒 Gastos</button>
+        </div>
     </div>
 
-    <div id="pro-section">
-        <h4 style="margin:0">Extrato Detalhado (PRO)</h4>
-        <div id="lista-detalhes" style="max-height: 150px; overflow-y: auto; margin-top:10px;"></div>
-        <button class="btn-atv" style="background:#334155; margin-top:10px;" onclick="pdf()">Gerar PDF com Descrições</button>
+    <button id="btn-atv" style="width:100%; background: var(--text); color: var(--card); margin-top: 20px;" onclick="abrirModalAtv()">✨ ATIVAR PLANO PRO (50 MT)</button>
+
+    <div id="pro-ui">
+        <div class="section-label">Histórico Detalhado</div>
+        <div class="list-container" id="lista-detalhes"></div>
+        <button style="width:100%; background: #334155; margin-top:15px; font-size: 12px;" onclick="gerarPDF()">📄 Exportar Relatório PDF</button>
     </div>
 
-    <button style="background:none; color:#94a3b8; font-size:10px; margin-top:20px; border:none;" onclick="location.reload()">Trocar de Conta</button>
+    <button style="background:none; color: var(--sub); font-size: 11px; margin-top: 25px; width:100%;" onclick="location.reload()">Sair da Conta</button>
 </div>
 
 <div id="modal-atv" class="modal">
-    <div class="app" style="width: 80%;">
-        <h3>Ativar PRO</h3>
-        <p style="font-size: 12px; color: #64748b;">Libere descrições em cada valor, extrato e relatórios.</p>
+    <div class="m-content">
+        <h3>Ativar Plano PRO</h3>
+        <p style="font-size: 12px; color: var(--sub);">Gestão de dívidas, investimentos e extratos ilimitados.</p>
         <input type="text" id="cod-input" placeholder="Código de 4 Letras">
-        <button class="btn-g" style="width: 100%;" onclick="confirmarCod()">Validar</button>
-        <button class="btn-e" style="width: 100%; margin-top: 5px;" onclick="zap()">Pedir Código no WhatsApp</button>
-        <button style="background:none; color:gray; width: 100%; margin-top: 10px; border:none;" onclick="document.getElementById('modal-atv').style.display='none'">Fechar</button>
+        <button class="b-gan" style="width: 100%;" onclick="confirmarCod()">Validar Código</button>
+        <button class="b-emp" style="width: 100%; margin-top: 8px;" onclick="zap()">Pedir Código (WhatsApp)</button>
+        <button style="background:none; color:gray; font-size: 12px; margin-top: 10px;" onclick="fecharModais()">Cancelar</button>
+    </div>
+</div>
+
+<div id="modal-dev" class="modal">
+    <div class="m-content">
+        <h3>Liquidar Empréstimo</h3>
+        <select id="select-emp"></select>
+        <input type="number" id="dev-val" placeholder="Valor da Devolução">
+        <input type="text" id="dev-desc" placeholder="Nota de devolução">
+        <button class="b-dev" style="width: 100%;" onclick="processarDevolucao()">Confirmar Devolução</button>
+        <button style="background:none; color:gray; font-size: 12px; margin-top: 10px;" onclick="fecharModais()">Voltar</button>
     </div>
 </div>
 
 <script>
     let tel = ""; let db = {}; let chart;
 
+    function toggleTheme() {
+        const b = document.body;
+        b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    }
+
     function logar() {
         tel = document.getElementById('login-phone').value;
         if(tel.length < 8) return alert("Número inválido");
-        db = JSON.parse(localStorage.getItem("u_"+tel)) || {emp:0, gan:0, ven:0, per:0, inv:0, pro:false, log:[]};
+        db = JSON.parse(localStorage.getItem("v5_"+tel)) || { 
+            emp:0, gan:0, per:0, inv:0, gas:0, pro:false, log:[], dividas:[] 
+        };
         document.getElementById('login-screen').style.display='none';
         document.getElementById('main-app').style.display='block';
+        initChart();
+        refresh();
+    }
+
+    function initChart() {
         const ctx = document.getElementById('myChart').getContext('2d');
         chart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['E','G','V','P','I'],
-                datasets: [{ data: [db.emp, db.gan, db.ven, db.per, db.inv], backgroundColor: ['#2563eb','#22c55e','#f59e0b','#ef4444','#a855f7'], borderWidth: 0 }]
+                labels: ['Emp','Gan','Per','Inv','Gas'],
+                datasets: [{ 
+                    data: [db.emp, db.gan, db.per, db.inv, db.gas], 
+                    backgroundColor: ['#2563eb','#10b981','#ef4444','#8b5cf6','#475569'], 
+                    borderWidth: 0, hoverOffset: 10 
+                }]
             },
-            options: { cutout:'82%', plugins:{legend:{display:false}} }
+            options: { cutout:'85%', plugins:{legend:{display:false}} }
         });
-        refresh();
     }
 
     function refresh() {
-        const total = db.emp + db.gan + db.ven - db.per - db.inv;
-        document.getElementById('topo-val').innerText = total + " MT";
-        document.getElementById('liq-val').innerText = (total - db.inv - db.per) + " MT";
-        document.getElementById('qui-val').innerText = (db.gan + db.ven - db.per - db.inv) + " MT";
-        chart.data.datasets[0].data = [db.emp, db.gan, db.ven, db.per, db.inv];
+        // Cálculo de saldo: Ganhos + Empréstimos - (Perdas + Investimentos + Gastos)
+        const saldo = (db.gan + db.emp) - (db.per + db.inv + db.gas);
+        document.getElementById('topo-val').innerText = saldo.toLocaleString() + " MT";
+        
+        chart.data.datasets[0].data = [db.emp, db.gan, db.per, db.inv, db.gas];
         chart.update();
 
         if(db.pro) {
-            document.getElementById('status-tag').className = "badge pro";
-            document.getElementById('status-tag').innerText = "NÍVEL: PRO ✨";
+            document.getElementById('status-tag').className = "badge badge-pro";
+            document.getElementById('status-tag').innerText = "NÍVEL PRO ✨";
             document.getElementById('btn-atv').style.display = "none";
-            document.getElementById('pro-section').style.display = "block";
+            document.getElementById('pro-buttons').style.display = "block";
+            document.getElementById('pro-ui').style.display = "block";
+            
             const lista = document.getElementById('lista-detalhes');
             lista.innerHTML = db.log.map(i => `
-                <div class="item-hist">
-                    <div>
-                        <strong>${i.t}</strong><br>
-                        <span class="desc-text">${i.d || 'Sem descrição'}</span>
+                <div class="hist-item">
+                    <div class="hist-info">
+                        <span class="hist-title">${i.t}</span>
+                        <span class="hist-desc">${i.d} • ${i.time}</span>
                     </div>
-                    <strong style="color:${i.t=='Perda'?'red':'green'}">${i.v} MT</strong>
+                    <span style="font-weight:800; color:${getColor(i.t)}">${i.v} MT</span>
                 </div>
-            `).join('');
+            `).reverse().join('');
         }
-        localStorage.setItem("u_"+tel, JSON.stringify(db));
+        localStorage.setItem("v5_"+tel, JSON.stringify(db));
+    }
+
+    function getColor(tipo) {
+        if(tipo === 'Ganho' || tipo === 'Empréstimo') return 'var(--s)';
+        return 'var(--d)';
     }
 
     function adicionar(key, nome) {
-        let desc = "";
-        if(db.pro) desc = prompt(`Descrição para este ${nome}:`);
-        const val = parseFloat(prompt(`Valor para ${nome}:`));
-        
-        if(!isNaN(val)) {
-            db[key] += val;
-            if(db.pro) db.log.unshift({t: nome, v: val, d: desc, time: new Date().toLocaleString()});
-            refresh();
+        const valor = parseFloat(prompt(`Valor de ${nome}:`));
+        if(isNaN(valor)) return;
+        const desc = prompt(`Descrição para ${nome}:`) || "Geral";
+
+        db[key] += valor;
+        const entry = { t: nome, v: valor, d: desc, time: new Date().toLocaleDateString() };
+        db.log.push(entry);
+
+        // Se for empréstimo, salvar na lista de dívidas ativas
+        if(key === 'emp') {
+            db.dividas.push({ id: Date.now(), desc: desc, total: valor, atual: valor });
         }
+        refresh();
     }
 
-    function abrirModal() { document.getElementById('modal-atv').style.display='flex'; }
-    function zap() { window.open(`https://wa.me/258860407269?text=Peço meu código pro. Número: ${tel}`); }
+    function abrirDevolucao() {
+        const select = document.getElementById('select-emp');
+        const dividasAtivas = db.dividas.filter(d => d.atual > 0);
+        
+        if(dividasAtivas.length === 0) return alert("Não há empréstimos ativos para devolver.");
+        
+        select.innerHTML = dividasAtivas.map(d => 
+            `<option value="${d.id}">${d.desc} (Faltam: ${d.atual} MT)</option>`
+        ).join('');
+        document.getElementById('modal-dev').style.display='flex';
+    }
+
+    function processarDevolucao() {
+        const id = document.getElementById('select-emp').value;
+        const valor = parseFloat(document.getElementById('dev-val').value);
+        const desc = document.getElementById('dev-desc').value || "Pagamento de dívida";
+
+        if(isNaN(valor) || valor <= 0) return alert("Insira um valor válido");
+
+        const divida = db.dividas.find(d => d.id == id);
+        if(valor > divida.atual) return alert("O valor é maior que a dívida atual!");
+
+        divida.atual -= valor;
+        db.gas += valor; // Devolução conta como uma saída/gasto de caixa
+        db.log.push({ t: 'Devolucão', v: valor, d: `Ref: ${divida.desc} - ${desc}`, time: new Date().toLocaleDateString() });
+        
+        fecharModais();
+        refresh();
+    }
+
+    function abrirModalAtv() { document.getElementById('modal-atv').style.display='flex'; }
+    function fecharModais() { 
+        document.getElementById('modal-atv').style.display='none'; 
+        document.getElementById('modal-dev').style.display='none';
+    }
+
+    function zap() { window.open(`https://wa.me/258860407269?text=Quero o código PRO. Conta: ${tel}`); }
 
     function confirmarCod() {
         const input = document.getElementById('cod-input').value.toUpperCase();
-        const ult4 = tel.slice(-4);
-        const ref = ["A","B","C","D","E","F","G","H","I","J"];
-        let ok = ""; for(let n of ult4) ok += ref[parseInt(n)];
-        if(input === ok) { db.pro = true; alert("PRO ATIVADO!"); document.getElementById('modal-atv').style.display='none'; refresh(); }
-        else { alert("Código inválido"); }
+        const ok = Array.from(tel.slice(-4)).map(n => "ABCDEFGHIJ"[n]).join('');
+        if(input === ok) { 
+            db.pro = true; alert("NÍVEL PRO ATIVADO!"); fecharModais(); refresh(); 
+        } else { alert("Código incorreto!"); }
     }
 
-    function pdf() {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.text("RELATÓRIO DETALHADO PRO", 20, 20);
-        doc.text(`Conta: ${tel}`, 20, 30);
-        db.log.forEach((l, i) => {
-            doc.text(`${l.time} - ${l.t}: ${l.v} MT (${l.d})`, 20, 45 + (i*10));
+    function gerarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFont("helvetica", "bold");
+        doc.text("RELATÓRIO FINANCEIRO PRO", 20, 20);
+        doc.setFontSize(10);
+        doc.text(`Telefone: ${tel} | Data: ${new Date().toLocaleString()}`, 20, 30);
+        
+        let y = 45;
+        db.log.forEach((l) => {
+            doc.text(`${l.time} - ${l.t}: ${l.v} MT (${l.d})`, 20, y);
+            y += 8;
         });
-        doc.save("financeiro.pdf");
+        doc.save(`Financeiro_${tel}.pdf`);
     }
 </script>
 </body>
