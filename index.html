@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financeiro Master PRO v6</title>
+    <title>Financeiro Master PRO v7</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
@@ -13,6 +13,8 @@
             --p: #3b82f6; --s: #10b981; --d: #ef4444; --w: #f59e0b; --v: #8b5cf6;
             --glass: rgba(255, 255, 255, 0.03);
             --neon-p: 0 0 15px rgba(37, 99, 235, 0.4);
+            --danger: #dc2626;
+            --success: #059669;
         }
 
         body { 
@@ -22,14 +24,13 @@
         }
 
         .app { 
-            max-width: 400px; width: 100%; margin: auto; 
+            max-width: 420px; width: 100%; margin: auto; 
             background: var(--card); padding: 30px; border-radius: 40px; 
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255,255,255,0.05);
             position: relative; overflow: hidden;
         }
 
-        /* Efeito de Luz no Fundo */
         .app::before {
             content: ''; position: absolute; top: -50px; left: -50px; width: 150px; height: 150px;
             background: var(--p); filter: blur(80px); opacity: 0.2; z-index: 0;
@@ -37,22 +38,35 @@
 
         .header-ui { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
 
-        /* Badge Pro */
         .badge { font-size: 10px; padding: 6px 14px; border-radius: 50px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
         .badge-normal { background: var(--glass); color: var(--sub); border: 1px solid rgba(255,255,255,0.1); }
         .badge-pro { background: linear-gradient(90deg, #f59e0b, #ec4899); color: white; box-shadow: var(--neon-p); }
 
-        /* Visor de Saldo */
         .balance-container { text-align: center; margin: 30px 0; position: relative; }
         .balance { font-size: 38px; font-weight: 800; letter-spacing: -1px; background: linear-gradient(to bottom, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* Dashboard Chart */
-        .chart-wrapper { width: 180px; margin: 0 auto; position: relative; }
-        
-        /* Botões */
+        .balance.negative { background: linear-gradient(to bottom, #ef4444, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .balance-details { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; 
+            font-size: 11px; color: var(--sub);
+        }
+        .balance-box { 
+            background: var(--glass); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .balance-box .value { font-weight: 700; color: var(--text); font-size: 14px; margin-top: 4px; }
+        .balance-box .value.positive { color: var(--success); }
+        .balance-box .value.negative { color: var(--danger); }
+
+        .chart-wrapper { 
+            width: 200px; 
+            height: 200px;
+            margin: 0 auto; 
+            position: relative; 
+        }
+
         .section-label { font-size: 11px; font-weight: 700; color: var(--sub); margin: 20px 0 10px 5px; text-transform: uppercase; letter-spacing: 1px; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        
+
         button { 
             padding: 16px; border: none; border-radius: 20px; font-weight: 700; color: white; 
             cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 13px;
@@ -64,35 +78,82 @@
         .b-gan { background: #059669; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3); }
         .b-per { background: #dc2626; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3); }
         .b-emp { background: #2563eb; }
-        .b-inv { background: #7c3aed; }
         .b-dev { background: #d97706; }
+        .b-inv { background: #7c3aed; }
         .b-gas { background: #4b5563; }
-        
-        /* Reset Button Especial */
+        .b-pag { background: #0891b2; }
+
         .btn-reset { 
             background: var(--glass); border: 1px solid rgba(239, 68, 68, 0.2); 
             color: #ef4444; width: 100%; margin-top: 15px; 
         }
 
-        /* Input Customizado */
-        input { 
+        input, select { 
             width: 100%; padding: 15px; margin: 10px 0; border: 1px solid rgba(255,255,255,0.1); 
             border-radius: 15px; background: rgba(0,0,0,0.2); color: white; box-sizing: border-box;
         }
+        input:focus, select:focus { outline: none; border-color: var(--p); }
 
-        /* Lista de Histórico */
         .list-container { background: var(--glass); border-radius: 24px; padding: 5px; max-height: 250px; overflow-y: auto; }
         .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); }
         .hist-title { font-size: 13px; font-weight: 600; }
         .hist-desc { font-size: 10px; color: var(--sub); }
+        .status-badge { 
+            font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 700; margin-left: 8px;
+        }
+        .status-disponivel { background: rgba(5, 150, 105, 0.2); color: #10b981; }
+        .status-indisponivel { background: rgba(220, 38, 38, 0.2); color: #ef4444; }
 
-        /* Modais */
         .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter: blur(12px); align-items:center; justify-content:center; z-index: 1000; }
-        .m-content { background: var(--card); width: 85%; max-width: 320px; padding: 30px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .m-content { background: var(--card); width: 85%; max-width: 320px; padding: 30px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.1); text-align: center; max-height: 80vh; overflow-y: auto; }
+
+        .checkbox-container { 
+            display: flex; align-items: center; justify-content: center; gap: 10px; 
+            margin: 15px 0; padding: 15px; background: var(--glass); border-radius: 12px;
+        }
+        .checkbox-container input[type="checkbox"] { width: auto; margin: 0; }
+        .checkbox-container label { color: var(--sub); font-size: 13px; }
+
+        .emprestimo-card { 
+            background: var(--glass); border-radius: 16px; padding: 15px; margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .emprestimo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .emprestimo-title { font-weight: 700; font-size: 14px; }
+        .emprestimo-valor { font-weight: 800; font-size: 16px; }
+        .emprestimo-valor.disponivel { color: #10b981; }
+        .emprestimo-valor.indisponivel { color: #ef4444; }
+        .emprestimo-info { font-size: 11px; color: var(--sub); }
+        .progress-bar { 
+            width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; 
+            margin-top: 8px; overflow: hidden;
+        }
+        .progress-fill { 
+            height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        .progress-fill.danger { background: linear-gradient(90deg, #ef4444, #dc2626); }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .summary-section { 
+            background: var(--glass); border-radius: 20px; padding: 20px; margin: 20px 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .summary-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;
+        }
+        .summary-item { text-align: center; }
+        .summary-label { font-size: 10px; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; }
+        .summary-value { font-size: 18px; font-weight: 800; margin-top: 5px; }
+        .summary-value.ganho { color: #10b981; }
+        .summary-value.perda { color: #ef4444; }
+        .summary-value.invest { color: #8b5cf6; }
+        .summary-value.emp { color: #3b82f6; }
+        .summary-value.saldo { color: #f8fafc; }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -107,16 +168,26 @@
 <div id="main-app" class="app" style="display:none;">
     <div class="header-ui">
         <div id="status-tag" class="badge badge-normal">Nível Básico</div>
-        <div style="font-weight: 800; font-size: 12px; color: var(--p);">v6.0</div>
+        <div style="font-weight: 800; font-size: 12px; color: var(--p);">v7.0</div>
     </div>
 
     <div class="balance-container">
         <div class="chart-wrapper">
             <canvas id="myChart"></canvas>
         </div>
-        <div style="margin-top: -20px;">
-            <span style="font-size: 11px; color: var(--sub); font-weight: 700;">DISPONÍVEL</span><br>
+        <div style="margin-top: 10px;">
+            <span style="font-size: 11px; color: var(--sub); font-weight: 700;">SALDO DISPONÍVEL</span><br>
             <span class="balance" id="topo-val">0 MT</span>
+        </div>
+        <div class="balance-details">
+            <div class="balance-box">
+                <div>Total Recebido</div>
+                <div class="value positive" id="total-recebido">0 MT</div>
+            </div>
+            <div class="balance-box">
+                <div>Total Saídas</div>
+                <div class="value negative" id="total-saidas">0 MT</div>
+            </div>
         </div>
     </div>
 
@@ -129,17 +200,46 @@
     <div id="pro-features" style="display: none;">
         <div class="section-label">Gestão Avançada</div>
         <div class="btn-grid">
-            <button class="b-emp" onclick="adicionar('emp', 'Empréstimo')">🏦 Emprést.</button>
-            <button class="b-dev" onclick="abrirDevolucao()">💸 Devolução</button>
+            <button class="b-emp" onclick="abrirModalEmprestimo()">🏦 Empréstimo</button>
+            <button class="b-pag" onclick="abrirModalPagamentoEmprestimo()">💳 Pagar Emprést.</button>
             <button class="b-inv" onclick="adicionar('inv', 'Investimento')">📈 Invest.</button>
             <button class="b-gas" onclick="adicionar('gas', 'Gasto Extra')">🛒 Outros</button>
         </div>
 
+        <div class="summary-section">
+            <div style="font-size: 12px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; text-align: center;">Balanço Financeiro</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Ganhos</div>
+                    <div class="summary-value ganho" id="balanco-ganhos">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Perdas</div>
+                    <div class="summary-value perda" id="balanco-perdas">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Investimentos</div>
+                    <div class="summary-value invest" id="balanco-invest">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Empréstimos</div>
+                    <div class="summary-value emp" id="balanco-emprestimos">0</div>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                <div class="summary-label">Saldo Líquido</div>
+                <div class="summary-value saldo" id="balanco-saldo">0 MT</div>
+            </div>
+        </div>
+
+        <div class="section-label">Empréstimos Ativos</div>
+        <div class="list-container" id="lista-emprestimos" style="max-height: 200px; margin-bottom: 15px;"></div>
+
         <div class="section-label">Histórico Realtime</div>
         <div class="list-container" id="lista-detalhes"></div>
-        
+
         <button style="width:100%; background: var(--glass); margin-top:15px; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);" onclick="gerarPDF()">📄 Exportar Relatório</button>
-        
+
         <button class="btn-reset" onclick="resetSistema()">⚠️ Resetar Sistema (0000)</button>
     </div>
 
@@ -148,6 +248,7 @@
     <button style="background:none; color: var(--sub); font-size: 11px; margin-top: 20px; width:100%;" onclick="location.reload()">Desconectar</button>
 </div>
 
+<!-- Modal Ativação PRO -->
 <div id="modal-atv" class="modal">
     <div class="m-content">
         <h3>Ativação PRO</h3>
@@ -157,25 +258,81 @@
     </div>
 </div>
 
-<div id="modal-dev" class="modal">
+<!-- Modal Novo Empréstimo -->
+<div id="modal-emp" class="modal">
     <div class="m-content">
-        <h3>Liquidar</h3>
-        <select id="select-emp" style="width:100%; padding:10px; border-radius:10px; margin-bottom:10px;"></select>
-        <input type="number" id="dev-val" placeholder="Valor MT">
-        <button class="b-dev" style="width: 100%;" onclick="processarDevolucao()">CONFIRMAR PAGAMENTO</button>
+        <h3>Novo Empréstimo</h3>
+        <input type="number" id="emp-valor" placeholder="Valor do Empréstimo (MT)">
+        <input type="text" id="emp-desc" placeholder="Descrição (ex: João, Maria)">
+        <div class="checkbox-container">
+            <input type="checkbox" id="emp-disponivel" checked>
+            <label for="emp-disponivel">Valor ainda está disponível para uso</label>
+        </div>
+        <p style="font-size: 11px; color: var(--sub); margin: 10px 0;">
+            <span style="color: #10b981;">✓ Disponível</span> = Soma ao saldo<br>
+            <span style="color: #ef4444;">✗ Indisponível</span> = Não soma (saldo negativo)
+        </p>
+        <button class="b-emp" style="width: 100%;" onclick="salvarEmprestimo()">REGISTAR EMPRÉSTIMO</button>
+        <button style="background:none; color:var(--sub); font-size: 12px; margin-top: 10px;" onclick="fecharModais()">VOLTAR</button>
+    </div>
+</div>
+
+<!-- Modal Pagar Empréstimo -->
+<div id="modal-pag" class="modal">
+    <div class="m-content">
+        <h3>Pagar Empréstimo</h3>
+        <select id="select-emprestimo" style="margin-bottom: 15px;">
+            <option value="">Selecione um empréstimo...</option>
+        </select>
+        <div id="emprestimo-detalhes" style="background: var(--glass); padding: 15px; border-radius: 12px; margin-bottom: 15px; display: none;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 11px; color: var(--sub);">Valor Original:</span>
+                <span id="det-original" style="font-weight: 700;">0 MT</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 11px; color: var(--sub);">Já Pago:</span>
+                <span id="det-pago" style="font-weight: 700; color: #10b981;">0 MT</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <span style="font-size: 11px; color: var(--sub);">Restante:</span>
+                <span id="det-restante" style="font-weight: 800; color: #f59e0b;">0 MT</span>
+            </div>
+        </div>
+        <input type="number" id="pag-valor" placeholder="Valor a Pagar (MT)">
+        <button class="b-pag" style="width: 100%;" onclick="processarPagamentoEmprestimo()">CONFIRMAR PAGAMENTO</button>
         <button style="background:none; color:var(--sub); font-size: 12px; margin-top: 10px;" onclick="fecharModais()">VOLTAR</button>
     </div>
 </div>
 
 <script>
-    let tel = ""; let db = {}; let chart;
+    let tel = ""; 
+    let db = {}; 
+    let chart;
+
+    // Estrutura de dados melhorada
+    const dbDefault = { 
+        gan: 0,      // Total de ganhos
+        per: 0,      // Total de perdas/gastos
+        inv: 0,      // Total de investimentos
+        gas: 0,      // Total de gastos extras
+        pro: false, 
+        log: [],     // Histórico de transações
+        emprestimos: [] // Array de empréstimos: {id, valor, desc, disponivel, pago, restante, data}
+    };
 
     function logar() {
         tel = document.getElementById('login-phone').value;
         if(tel.length < 8) return alert("Número inválido");
-        db = JSON.parse(localStorage.getItem("v6_"+tel)) || { 
-            emp:0, gan:0, per:0, inv:0, gas:0, pro:false, log:[], dividas:[] 
-        };
+
+        const saved = localStorage.getItem("v7_" + tel);
+        if(saved) {
+            db = JSON.parse(saved);
+            // Garantir estrutura completa para versões antigas
+            if(!db.emprestimos) db.emprestimos = [];
+        } else {
+            db = JSON.parse(JSON.stringify(dbDefault));
+        }
+
         document.getElementById('login-screen').style.display='none';
         document.getElementById('main-app').style.display='block';
         initChart();
@@ -187,22 +344,98 @@
         chart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Emp','Gan','Per','Inv','Gas'],
+                labels: ['Gan','Per','Inv','Gas','Emp Disp'],
                 datasets: [{ 
-                    data: [db.emp, db.gan, db.per, db.inv, db.gas], 
-                    backgroundColor: ['#2563eb','#10b981','#ef4444','#8b5cf6','#4b5563'], 
-                    borderWidth: 0, cutout: '85%'
+                    data: [0, 0, 0, 0, 0], 
+                    backgroundColor: ['#10b981','#ef4444','#8b5cf6','#4b5563','#2563eb'], 
+                    borderWidth: 0, 
+                    cutout: '75%',
+                    borderRadius: 5,
+                    spacing: 2
                 }]
             },
-            options: { plugins:{legend:{display:false}}, animation: { animateScale: true } }
+            options: { 
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#94a3b8',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 12,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return `${label}: ${value.toLocaleString()} MT (${percentage}%)`;
+                            }
+                        }
+                    }
+                }, 
+                animation: { 
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                }
+            }
         });
     }
 
+    // Calcular totais de empréstimos
+    function calcularEmprestimos() {
+        let totalEmprestimos = 0;
+        let totalDisponivel = 0;
+        let totalIndisponivel = 0;
+        let totalPendente = 0;
+
+        db.emprestimos.forEach(emp => {
+            totalEmprestimos += emp.valor;
+            if(emp.disponivel) {
+                totalDisponivel += emp.restante;
+            } else {
+                totalIndisponivel += emp.restante;
+            }
+            totalPendente += emp.restante;
+        });
+
+        return { totalEmprestimos, totalDisponivel, totalIndisponivel, totalPendente };
+    }
+
+    // Calcular saldo disponível
+    function calcularSaldo() {
+        const emp = calcularEmprestimos();
+        // Saldo = Ganhos + Empréstimos Disponíveis - Perdas - Investimentos - Gastos - Empréstimos Indisponíveis
+        const saldo = db.gan + emp.totalDisponivel - db.per - db.inv - db.gas - emp.totalIndisponivel;
+        return saldo;
+    }
+
     function refresh() {
-        const saldo = (db.gan + db.emp) - (db.per + db.inv + db.gas);
-        document.getElementById('topo-val').innerText = saldo.toLocaleString() + " MT";
-        
-        chart.data.datasets[0].data = [db.emp, db.gan, db.per, db.inv, db.gas];
+        const saldo = calcularSaldo();
+        const emp = calcularEmprestimos();
+
+        // Total recebido (ganhos + empréstimos disponíveis)
+        const totalRecebido = db.gan + emp.totalDisponivel;
+        // Total saídas (perdas + investimentos + gastos + empréstimos indisponíveis)
+        const totalSaidas = db.per + db.inv + db.gas + emp.totalIndisponivel;
+
+        // Atualizar saldo principal
+        const saldoEl = document.getElementById('topo-val');
+        saldoEl.innerText = saldo.toLocaleString() + " MT";
+        saldoEl.className = saldo >= 0 ? "balance" : "balance negative";
+
+        // Atualizar detalhes
+        document.getElementById('total-recebido').innerText = totalRecebido.toLocaleString() + " MT";
+        document.getElementById('total-saidas').innerText = totalSaidas.toLocaleString() + " MT";
+
+        // Atualizar gráfico
+        chart.data.datasets[0].data = [db.gan, db.per, db.inv, db.gas, emp.totalDisponivel];
         chart.update();
 
         if(db.pro) {
@@ -210,38 +443,195 @@
             document.getElementById('status-tag').innerText = "Premium PRO";
             document.getElementById('btn-atv').style.display = "none";
             document.getElementById('pro-features').style.display = "block";
-            
+
+            // Atualizar balanço
+            document.getElementById('balanco-ganhos').innerText = db.gan.toLocaleString() + " MT";
+            document.getElementById('balanco-perdas').innerText = db.per.toLocaleString() + " MT";
+            document.getElementById('balanco-invest').innerText = db.inv.toLocaleString() + " MT";
+            document.getElementById('balanco-emprestimos').innerText = emp.totalPendente.toLocaleString() + " MT";
+            document.getElementById('balanco-saldo').innerText = saldo.toLocaleString() + " MT";
+
+            // Atualizar lista de empréstimos
+            atualizarListaEmprestimos();
+
+            // Atualizar histórico
             const lista = document.getElementById('lista-detalhes');
             lista.innerHTML = db.log.slice(-10).map(i => `
                 <div class="hist-item">
                     <div class="hist-info">
-                        <span class="hist-title">${i.t}</span><br>
+                        <span class="hist-title">${i.t}</span>
+                        ${i.status ? `<span class="status-badge status-${i.status}">${i.status === 'disponivel' ? 'Disponível' : 'Indisponível'}</span>` : ''}
+                        <br>
                         <span class="hist-desc">${i.d}</span>
                     </div>
-                    <span style="font-weight:800; color:${(i.t=='Ganho'||i.t=='Empréstimo')?'#10b981':'#ef4444'}">${i.v} MT</span>
+                    <span style="font-weight:800; color:${(i.t=='Ganho'||i.t=='Empréstimo'||i.t=='Pagamento Recebido')?'#10b981':'#ef4444'}">${i.v} MT</span>
                 </div>
             `).reverse().join('');
         }
-        localStorage.setItem("v6_"+tel, JSON.stringify(db));
+        localStorage.setItem("v7_" + tel, JSON.stringify(db));
+    }
+
+    function atualizarListaEmprestimos() {
+        const container = document.getElementById('lista-emprestimos');
+        const emprestimosAtivos = db.emprestimos.filter(e => e.restante > 0);
+
+        if(emprestimosAtivos.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--sub); font-size: 12px;">Nenhum empréstimo ativo</div>';
+            return;
+        }
+
+        container.innerHTML = emprestimosAtivos.map(emp => {
+            const percentPago = ((emp.valor - emp.restante) / emp.valor) * 100;
+            return `
+                <div class="emprestimo-card">
+                    <div class="emprestimo-header">
+                        <div>
+                            <span class="emprestimo-title">${emp.desc}</span>
+                            <span class="status-badge ${emp.disponivel ? 'status-disponivel' : 'status-indisponivel'}">
+                                ${emp.disponivel ? 'Disponível' : 'Indisponível'}
+                            </span>
+                        </div>
+                        <span class="emprestimo-valor ${emp.disponivel ? 'disponivel' : 'indisponivel'}">${emp.restante.toLocaleString()} MT</span>
+                    </div>
+                    <div class="emprestimo-info">
+                        Original: ${emp.valor.toLocaleString()} MT | Pago: ${emp.pago.toLocaleString()} MT
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${percentPago < 30 ? 'danger' : ''}" style="width: ${percentPago}%"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     function adicionar(key, nome) {
         const valor = parseFloat(prompt(`Valor de ${nome}:`));
-        if(!valor || isNaN(valor)) return;
+        if(!valor || isNaN(valor) || valor <= 0) return;
         const desc = prompt(`Referência:`) || "Sem nota";
 
         db[key] += valor;
-        db.log.push({ t: nome, v: valor, d: desc, time: new Date().toLocaleTimeString() });
-
-        if(key === 'emp') db.dividas.push({ id: Date.now(), desc: desc, total: valor, atual: valor });
+        db.log.push({ 
+            t: nome, 
+            v: valor, 
+            d: desc, 
+            time: new Date().toLocaleString() 
+        });
         refresh();
     }
 
-    // FUNÇÃO RESET PEDIDA
+    // Modal Empréstimo
+    function abrirModalEmprestimo() {
+        document.getElementById('emp-valor').value = '';
+        document.getElementById('emp-desc').value = '';
+        document.getElementById('emp-disponivel').checked = true;
+        document.getElementById('modal-emp').style.display = 'flex';
+    }
+
+    function salvarEmprestimo() {
+        const valor = parseFloat(document.getElementById('emp-valor').value);
+        const desc = document.getElementById('emp-desc').value || "Empréstimo";
+        const disponivel = document.getElementById('emp-disponivel').checked;
+
+        if(!valor || isNaN(valor) || valor <= 0) {
+            alert("Por favor, insira um valor válido");
+            return;
+        }
+
+        const emprestimo = {
+            id: Date.now(),
+            valor: valor,
+            desc: desc,
+            disponivel: disponivel,
+            pago: 0,
+            restante: valor,
+            data: new Date().toLocaleString()
+        };
+
+        db.emprestimos.push(emprestimo);
+        db.log.push({ 
+            t: 'Empréstimo', 
+            v: valor, 
+            d: desc, 
+            status: disponivel ? 'disponivel' : 'indisponivel',
+            time: new Date().toLocaleString() 
+        });
+
+        fecharModais();
+        refresh();
+    }
+
+    // Modal Pagamento de Empréstimo
+    function abrirModalPagamentoEmprestimo() {
+        const select = document.getElementById('select-emprestimo');
+        const emprestimosAtivos = db.emprestimos.filter(e => e.restante > 0);
+
+        if(emprestimosAtivos.length === 0) {
+            alert("Não há empréstimos pendentes para pagar.");
+            return;
+        }
+
+        select.innerHTML = '<option value="">Selecione um empréstimo...</option>' + 
+            emprestimosAtivos.map(e => `<option value="${e.id}">${e.desc} - ${e.restante.toLocaleString()} MT restantes</option>`).join('');
+
+        select.onchange = function() {
+            const emp = db.emprestimos.find(e => e.id == this.value);
+            if(emp) {
+                document.getElementById('emprestimo-detalhes').style.display = 'block';
+                document.getElementById('det-original').innerText = emp.valor.toLocaleString() + " MT";
+                document.getElementById('det-pago').innerText = emp.pago.toLocaleString() + " MT";
+                document.getElementById('det-restante').innerText = emp.restante.toLocaleString() + " MT";
+            } else {
+                document.getElementById('emprestimo-detalhes').style.display = 'none';
+            }
+        };
+
+        document.getElementById('pag-valor').value = '';
+        document.getElementById('emprestimo-detalhes').style.display = 'none';
+        document.getElementById('modal-pag').style.display = 'flex';
+    }
+
+    function processarPagamentoEmprestimo() {
+        const id = parseInt(document.getElementById('select-emprestimo').value);
+        const valor = parseFloat(document.getElementById('pag-valor').value);
+
+        if(!id) {
+            alert("Selecione um empréstimo");
+            return;
+        }
+        if(!valor || isNaN(valor) || valor <= 0) {
+            alert("Insira um valor válido");
+            return;
+        }
+
+        const emp = db.emprestimos.find(e => e.id === id);
+        if(!emp) return;
+
+        if(valor > emp.restante) {
+            alert(`O valor máximo para pagar é ${emp.restante.toLocaleString()} MT`);
+            return;
+        }
+
+        // Atualizar empréstimo
+        emp.pago += valor;
+        emp.restante -= valor;
+
+        // Registrar no log
+        db.log.push({ 
+            t: 'Pagamento de Empréstimo', 
+            v: valor, 
+            d: `${emp.desc} - Restante: ${emp.restante.toLocaleString()} MT`, 
+            time: new Date().toLocaleString() 
+        });
+
+        fecharModais();
+        refresh();
+    }
+
     function resetSistema() {
         const cod = prompt("CUIDADO: Isso apagará TODOS os dados. Digite o código de confirmação (0000):");
         if(cod === "0000") {
-            db = { emp:0, gan:0, per:0, inv:0, gas:0, pro:true, log:[], dividas:[] };
+            db = JSON.parse(JSON.stringify(dbDefault));
+            db.pro = true; // Manter PRO ativo
             alert("Sistema limpo com sucesso!");
             refresh();
         } else {
@@ -249,43 +639,67 @@
         }
     }
 
-    function abrirDevolucao() {
-        const select = document.getElementById('select-emp');
-        const dividasAtivas = db.dividas.filter(d => d.atual > 0);
-        if(dividasAtivas.length === 0) return alert("Sem dívidas pendentes.");
-        select.innerHTML = dividasAtivas.map(d => `<option value="${d.id}">${d.desc} (${d.atual} MT)</option>`).join('');
-        document.getElementById('modal-dev').style.display='flex';
+    function abrirModalAtv() { 
+        document.getElementById('modal-atv').style.display = 'flex'; 
     }
 
-    function processarDevolucao() {
-        const id = document.getElementById('select-emp').value;
-        const valor = parseFloat(document.getElementById('dev-val').value);
-        if(!valor || valor <= 0) return;
-        const div = db.dividas.find(d => d.id == id);
-        if(valor > div.atual) return alert("Valor excede a dívida!");
-        
-        div.atual -= valor;
-        db.gas += valor;
-        db.log.push({ t: 'Pagamento', v: valor, d: `Dívida: ${div.desc}`, time: new Date().toLocaleTimeString() });
-        fecharModais(); refresh();
+    function fecharModais() { 
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); 
     }
 
-    function abrirModalAtv() { document.getElementById('modal-atv').style.display='flex'; }
-    function fecharModais() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
-    
     function confirmarCod() {
         const input = document.getElementById('cod-input').value.toUpperCase();
         const segredo = Array.from(tel.slice(-4)).map(n => "ABCDEFGHIJ"[n]).join('');
-        if(input === segredo) { db.pro = true; fecharModais(); refresh(); } else { alert("Código Inválido"); }
+        if(input === segredo) { 
+            db.pro = true; 
+            fecharModais(); 
+            refresh(); 
+        } else { 
+            alert("Código Inválido"); 
+        }
     }
 
     function gerarPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text("EXTRATO FINANCEIRO MASTER", 20, 20);
-        let y = 40;
-        db.log.forEach(l => { doc.text(`${l.t}: ${l.v} MT - ${l.d}`, 20, y); y+=10; });
-        doc.save("extrato.pdf");
+        const emp = calcularEmprestimos();
+        const saldo = calcularSaldo();
+
+        doc.setFontSize(16);
+        doc.text("EXTRATO FINANCEIRO MASTER PRO", 20, 20);
+
+        doc.setFontSize(12);
+        doc.text(`Telefone: ${tel}`, 20, 35);
+        doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 42);
+
+        doc.setFontSize(14);
+        doc.text("RESUMO GERAL", 20, 55);
+
+        doc.setFontSize(11);
+        doc.text(`Ganhos: ${db.gan.toLocaleString()} MT`, 20, 65);
+        doc.text(`Perdas: ${db.per.toLocaleString()} MT`, 20, 72);
+        doc.text(`Investimentos: ${db.inv.toLocaleString()} MT`, 20, 79);
+        doc.text(`Gastos Extras: ${db.gas.toLocaleString()} MT`, 20, 86);
+        doc.text(`Empréstimos Pendentes: ${emp.totalPendente.toLocaleString()} MT`, 20, 93);
+        doc.text(`Saldo Disponível: ${saldo.toLocaleString()} MT`, 20, 103);
+
+        doc.setFontSize(14);
+        doc.text("HISTÓRICO DE TRANSAÇÕES", 20, 115);
+
+        let y = 125;
+        doc.setFontSize(10);
+        db.log.forEach(l => { 
+            const line = `${l.t}: ${l.v} MT - ${l.d}`;
+            const splitLine = doc.splitTextToSize(line, 170);
+            doc.text(splitLine, 20, y); 
+            y += 7 * splitLine.length;
+            if(y > 280) {
+                doc.addPage();
+                y = 20;
+            }
+        });
+
+        doc.save(`extrato_${tel}.pdf`);
     }
 </script>
 </body>
